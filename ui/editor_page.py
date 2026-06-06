@@ -10,7 +10,7 @@ from skill_factory import pipeline
 from skill_factory.exporter import zip_skill
 from skill_factory.frontmatter import split_frontmatter
 from skill_factory.models import SkillMeta
-from skill_factory.openrouter import OpenRouterError
+from skill_factory.llm_client import LLMError
 from skill_factory.validator import validate_skill_md
 
 from . import (
@@ -107,7 +107,7 @@ def _refine_panel(slug: str) -> None:
             # Defer applying the new content to the next run (see render()).
             st.session_state["_pending_editor_content"] = res.content
             st.rerun()
-        except OpenRouterError as exc:
+        except LLMError as exc:
             st.error(str(exc))
 
 

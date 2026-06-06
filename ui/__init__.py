@@ -5,10 +5,13 @@ Keeps page modules thin and centralises session-state, settings and client wirin
 
 from __future__ import annotations
 
+import copy
+
 import streamlit as st
 
 from skill_factory.config import get_settings
-from skill_factory.openrouter import client_from_settings
+from skill_factory.llm_client import client_from_settings
+from skill_factory.providers import DEFAULT_PROVIDER
 from skill_factory.skill_store import SkillStore
 from skill_factory.validator import estimate_tokens
 
@@ -23,13 +26,16 @@ PAGES = [PAGE_CONFIG, PAGE_NEW, PAGE_LIBRARY, PAGE_EDITOR, PAGE_PLAYGROUND, PAGE
 
 _STATE_DEFAULTS = {
     "nav": PAGE_CONFIG,
-    # config overrides (never written to disk)
-    "api_key": "",
-    "default_model": "",
+    # config overrides (never written to disk). Per-provider values persist in plain
+    # session dicts so switching providers (which unmounts the widgets) never loses them.
+    "provider": DEFAULT_PROVIDER,
+    "provider_keys": {},        # provider_id -> api key
+    "provider_models": {},      # provider_id -> default model
+    "provider_base_urls": {},   # provider_id -> base url override
     "app_title": "",
     "app_url": "",
     "skills_dir": "",
-    "available_models": [],
+    "available_models": {},  # provider_id -> [model ids]
     # new-skill wizard
     "wiz_stage": "spec",
     "wiz_spec": None,
@@ -48,13 +54,18 @@ _STATE_DEFAULTS = {
 
 def ensure_state() -> None:
     for k, v in _STATE_DEFAULTS.items():
-        st.session_state.setdefault(k, v)
+        if k not in st.session_state:
+            # Fresh copy for mutable defaults so sessions don't share one object.
+            st.session_state[k] = copy.deepcopy(v) if isinstance(v, (dict, list)) else v
 
 
 def overrides() -> dict:
+    pid = st.session_state.get("provider", DEFAULT_PROVIDER)
     return {
-        "api_key": st.session_state.get("api_key", ""),
-        "default_model": st.session_state.get("default_model", ""),
+        "provider": pid,
+        "api_key": st.session_state.get("provider_keys", {}).get(pid, ""),
+        "base_url": st.session_state.get("provider_base_urls", {}).get(pid, ""),
+        "default_model": st.session_state.get("provider_models", {}).get(pid, ""),
         "app_title": st.session_state.get("app_title", ""),
         "app_url": st.session_state.get("app_url", ""),
         "skills_dir": st.session_state.get("skills_dir", ""),
@@ -70,7 +81,7 @@ def store() -> SkillStore:
 
 
 def get_client():
-    """Build an OpenRouter client from current settings (may raise if no key)."""
+    """Build the LLM client for the selected provider (may raise if not configured)."""
 
     return client_from_settings(overrides())
 
@@ -81,7 +92,8 @@ def has_key() -> bool:
 
 def require_key() -> bool:
     if not has_key():
-        st.warning("Set your OpenRouter API key on the **Config** page first.", icon="🔑")
+        st.warning("Set an API key for your selected provider on the **Config** page first.",
+                   icon="🔑")
         return False
     return True
 
@@ -97,9 +109,12 @@ def goto(page: str, **state) -> None:
 
 def model_selectbox(label: str = "Model", key: str | None = None):
     s = settings()
-    models = st.session_state.get("available_models") or []
+    cache = st.session_state.get("available_models") or {}
+    models = list(cache.get(s.provider_id, [])) or list(s.fallback_models)
     default = s.default_model
-    help_text = "Fetch the live model list on the Config page, or type any OpenRouter model id."
+    if default and default not in models:
+        models = [default] + models
+    help_text = "Pick a model, or set the default on the Config page."
     if models:
         # Seed/repair the keyed state (avoids passing index alongside key).
         if key:

@@ -52,8 +52,8 @@ with st.sidebar:
 
     st.divider()
     s = settings()
-    st.caption(("🟢 API key set" if s.has_key else "🔴 No API key") + f"\n\nModel: `{s.default_model}`")
-    st.caption("[Docs: SKILL.md & OpenRouter](https://openrouter.ai/docs)")
+    st.caption(("🟢 " if s.has_key else "🔴 ") + f"**{s.provider_label}**")
+    st.caption(f"Model: `{s.default_model}`")
 
 # Render the selected page.
 ROUTES[choice]()

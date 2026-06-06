@@ -6,7 +6,7 @@ import streamlit as st
 
 from skill_factory import pipeline
 from skill_factory.models import SKILL_TYPE_HELP, SKILL_TYPES, TONES, SkillMeta, SkillSpec
-from skill_factory.openrouter import OpenRouterError
+from skill_factory.llm_client import LLMError
 from skill_factory.references import combine_references, extract_text_from_upload
 from skill_factory.skill_store import slugify
 from skill_factory.validator import validate_skill_md
@@ -153,7 +153,7 @@ def _outline_stage() -> None:
                 with st.spinner("Planning outline…"):
                     res = pipeline.plan_outline(_client(), spec, model=model)
                 st.session_state["wiz_outline"] = res.content
-            except OpenRouterError as exc:
+            except LLMError as exc:
                 st.error(str(exc))
 
     st.text_area("Outline (edit freely before drafting)", key="wiz_outline", height=320)
@@ -186,7 +186,7 @@ def _draft_stage() -> None:
                     )
                 st.session_state["wiz_draft"] = res.content
                 st.session_state["wiz_draft_model"] = res.model
-            except OpenRouterError as exc:
+            except LLMError as exc:
                 st.error(str(exc))
 
     draft = st.session_state.get("wiz_draft", "")
