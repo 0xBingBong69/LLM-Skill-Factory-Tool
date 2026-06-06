@@ -6,7 +6,7 @@ import streamlit as st
 
 from skill_factory.frontmatter import split_frontmatter
 from skill_factory.models import TestResult
-from skill_factory.openrouter import OpenRouterError
+from skill_factory.llm_client import LLMError
 
 from . import get_client, model_selectbox, require_key, store
 
@@ -64,7 +64,7 @@ def render() -> None:
             st.session_state["pg_last"] = {
                 "prompt": user_prompt, "output": output, "model": model,
             }
-        except OpenRouterError as exc:
+        except LLMError as exc:
             st.error(str(exc))
     elif st.session_state.get("pg_last"):
         st.markdown(st.session_state["pg_last"]["output"])

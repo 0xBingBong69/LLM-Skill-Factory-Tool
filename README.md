@@ -5,11 +5,15 @@ A domain-agnostic **Skill Studio** for rapidly authoring high-quality, productio
 specific kind of work.
 
 Build a skill for a **backend engineer**, a **quant researcher**, a **robotics designer**, a
-**financial analyst**, or anything else. The tool is generic by design and powered by
-[OpenRouter](https://openrouter.ai) (bring your own API key).
+**financial analyst**, or anything else. The tool is generic by design and works with your choice
+of LLM provider — **OpenRouter**, **MiniMax**, **Kimi (Moonshot)**, or any OpenAI-compatible
+endpoint (bring your own API key).
 
 > The leverage comes from a strong built-in **meta-skill** plus a **multi-stage,
 > human-in-the-loop** pipeline — structured generation beats one-shot prompting.
+
+> 🆕 **New to Python or the command line?** Follow the step-by-step
+> **[Installation Guide → INSTALL.md](INSTALL.md)**, which walks you through everything from zero.
 
 ---
 
@@ -25,8 +29,9 @@ Build a skill for a **backend engineer**, a **quant researcher**, a **robotics d
   git-friendly and inspectable.
 - **Editor** with live markdown preview, a best-practice **validator**, and targeted LLM
   "refine this section".
-- **Testing playground**: run a skill as a system prompt against any OpenRouter model and record
-  thumbs/notes.
+- **Multi-provider**: OpenRouter, MiniMax, Kimi/Moonshot, or any custom OpenAI-compatible endpoint
+  — switch in the UI; keys are remembered per provider.
+- **Testing playground**: run a skill as a system prompt against any model and record thumbs/notes.
 - **Reference material ingestion**: paste text or upload files (`.txt`/`.md`; `.pdf` when `pypdf`
   is available).
 - **Export**: download a skill as a zip (with a usage guide) or copy it into another app.
@@ -35,26 +40,29 @@ Build a skill for a **backend engineer**, a **quant researcher**, a **robotics d
 
 ## Quickstart
 
+*First time with Python/terminals? Use the gentler **[step-by-step guide](INSTALL.md)** instead.*
+
 ```bash
 # 1. Install
 pip install -r requirements.txt
 
-# 2. Configure your key (either of these)
-cp .env.example .env        # then edit OPENROUTER_API_KEY=...
+# 2. Configure a key for the provider you want (either of these)
+cp .env.example .env        # then set OPENROUTER_API_KEY / MINIMAX_API_KEY / MOONSHOT_API_KEY
 # ...or just paste the key into the Config page at runtime (kept in-session only)
 
 # 3. Run
 streamlit run app.py
 ```
 
-Then open the app, go to **Config**, paste your OpenRouter key (if not using `.env`), click
-**Fetch available models**, and head to **New Skill**.
+Then open the app, go to **Config**, pick your **Provider**, paste its key (if not using `.env`),
+optionally click **Fetch models**, and head to **New Skill**.
 
 ### Docker
 
 ```bash
 docker build -t skill-factory .
 docker run -p 8501:8501 -e OPENROUTER_API_KEY=sk-or-... skill-factory
+# or: -e LLM_PROVIDER=kimi -e MOONSHOT_API_KEY=...   /   -e LLM_PROVIDER=minimax -e MINIMAX_API_KEY=...
 ```
 
 ---
@@ -113,17 +121,39 @@ entities; the batch generator turns each into a specialist overlay of a base ski
 
 ---
 
+## Providers
+
+All providers use the OpenAI-compatible Chat Completions API (`POST {base_url}/chat/completions`),
+so one client drives them all — only the base URL, key, and model ids differ. Pick a provider on
+the **Config** page; the base URL and model are editable (handy for regional endpoints), and keys
+are remembered per provider.
+
+| Provider | Key env var | Default base URL | Example model ids |
+|---|---|---|---|
+| **OpenRouter** | `OPENROUTER_API_KEY` | `https://openrouter.ai/api/v1` | `anthropic/claude-sonnet-4.6`, `openai/gpt-4o` |
+| **MiniMax** | `MINIMAX_API_KEY` | `https://api.minimax.io/v1` | `MiniMax-M3`, `MiniMax-M2.1`, `MiniMax-Text-01` |
+| **Kimi (Moonshot)** | `MOONSHOT_API_KEY` | `https://api.moonshot.ai/v1` | `kimi-k2.6`, `kimi-k2.5`, `moonshot-v1-8k` |
+| **Custom** | `LLM_API_KEY` | *(you set it)* | any |
+
+Regional endpoints: MiniMax China → `https://api.minimax.chat/v1`; Moonshot China →
+`https://api.moonshot.cn/v1` (set in **Advanced**). Base URLs and OpenAI-compatibility were
+verified against each provider's docs (June 2026). **Model ids evolve** — older Kimi ids
+(`kimi-k2-*`, `kimi-latest`) were retired in 2026, so type the model you want or click **Fetch
+models**. OpenRouter also proxies many MiniMax/Moonshot models (e.g. `minimax/...`,
+`moonshotai/...`) if you prefer a single key.
+
 ## Configuration
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `OPENROUTER_API_KEY` | Your OpenRouter key (required) | — |
-| `OPENROUTER_DEFAULT_MODEL` | Default generation model | `anthropic/claude-sonnet-4.6` |
-| `OPENROUTER_APP_TITLE` / `OPENROUTER_APP_URL` | Sent to OpenRouter for attribution | — |
+| `LLM_PROVIDER` | Which provider to use (`openrouter`/`minimax`/`kimi`/`custom`) | `openrouter` |
+| `OPENROUTER_API_KEY` / `MINIMAX_API_KEY` / `MOONSHOT_API_KEY` / `LLM_API_KEY` | Per-provider key | — |
+| `<PROVIDER>_DEFAULT_MODEL` | Default model, e.g. `OPENROUTER_DEFAULT_MODEL`, `KIMI_DEFAULT_MODEL` | provider default |
+| `APP_TITLE` / `APP_URL` | Attribution sent to OpenRouter | — |
 | `SKILLS_DIR` | Where skills are written | `./skills` |
 
-The API key is resolved as: **in-app input → environment → `.env`**, and is never written to disk
-by the app.
+Each value resolves as: **in-app input → environment → provider default**, and keys are never
+written to disk by the app.
 
 ---
 
@@ -131,7 +161,7 @@ by the app.
 
 ```bash
 pip install -r requirements.txt
-pytest                 # core round-trips, validator rules, pipeline (mocked), and an app smoke test
+pytest                 # store round-trips, validator rules, pipeline (mocked), provider resolution, app smoke test
 ```
 
 The core package [`skill_factory/`](skill_factory/) contains all logic and has **no Streamlit
