@@ -118,16 +118,24 @@ entities; the batch generator turns each into a specialist overlay of a base ski
 
 ## Providers
 
-All providers use the OpenAI-compatible Chat Completions API, so one client drives them all —
-only the base URL, key, and model ids differ. Pick a provider on the **Config** page; the base
-URL and model are editable (handy for regional endpoints), and keys are remembered per provider.
+All providers use the OpenAI-compatible Chat Completions API (`POST {base_url}/chat/completions`),
+so one client drives them all — only the base URL, key, and model ids differ. Pick a provider on
+the **Config** page; the base URL and model are editable (handy for regional endpoints), and keys
+are remembered per provider.
 
-| Provider | Key env var | Default base URL | Notes |
+| Provider | Key env var | Default base URL | Example model ids |
 |---|---|---|---|
-| **OpenRouter** | `OPENROUTER_API_KEY` | `https://openrouter.ai/api/v1` | One key, hundreds of models; live model listing. |
-| **MiniMax** | `MINIMAX_API_KEY` | `https://api.minimax.io/v1` | China platform: set base URL to `https://api.minimax.chat/v1`. |
-| **Kimi (Moonshot)** | `MOONSHOT_API_KEY` | `https://api.moonshot.ai/v1` | China platform: set base URL to `https://api.moonshot.cn/v1`. |
-| **Custom** | `LLM_API_KEY` | *(you set it)* | Any OpenAI-compatible gateway. |
+| **OpenRouter** | `OPENROUTER_API_KEY` | `https://openrouter.ai/api/v1` | `anthropic/claude-sonnet-4.6`, `openai/gpt-4o` |
+| **MiniMax** | `MINIMAX_API_KEY` | `https://api.minimax.io/v1` | `MiniMax-Text-01`, `MiniMax-M2.1`, `MiniMax-M1` |
+| **Kimi (Moonshot)** | `MOONSHOT_API_KEY` | `https://api.moonshot.ai/v1` | `kimi-k2.6`, `kimi-k2.5`, `moonshot-v1-8k` |
+| **Custom** | `LLM_API_KEY` | *(you set it)* | any |
+
+Regional endpoints: MiniMax China → `https://api.minimax.chat/v1`; Moonshot China →
+`https://api.moonshot.cn/v1` (set in **Advanced**). Base URLs and OpenAI-compatibility were
+verified against each provider's docs (June 2026). **Model ids evolve** — older Kimi ids
+(`kimi-k2-*`, `kimi-latest`) were retired in 2026, so type the model you want or click **Fetch
+models**. OpenRouter also proxies many MiniMax/Moonshot models (e.g. `minimax/...`,
+`moonshotai/...`) if you prefer a single key.
 
 ## Configuration
 

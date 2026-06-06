@@ -56,29 +56,31 @@ PROVIDERS: dict[str, Provider] = {
         base_url="https://api.minimax.io/v1",
         api_key_env="MINIMAX_API_KEY",
         default_model="MiniMax-Text-01",
-        models=("MiniMax-Text-01", "MiniMax-M1", "abab6.5s-chat", "abab6.5g-chat"),
+        models=("MiniMax-M2.1", "MiniMax-M1", "MiniMax-Text-01"),
         supports_model_listing=False,
-        keys_url="https://www.minimax.io/platform",
-        note="Uses MiniMax's OpenAI-compatible endpoint. For the China platform, set the "
-             "base URL to https://api.minimax.chat/v1 in Advanced.",
+        keys_url="https://platform.minimax.io/",
+        note="MiniMax's OpenAI-compatible endpoint (POST /v1/chat/completions). For the China "
+             "platform, set the base URL to https://api.minimax.chat/v1 in Advanced. Model ids "
+             "evolve (M2.x, M3…) — type the one you want.",
     ),
     "kimi": Provider(
         id="kimi",
         label="Kimi (Moonshot)",
         base_url="https://api.moonshot.ai/v1",
         api_key_env="MOONSHOT_API_KEY",
-        default_model="moonshot-v1-8k",
+        default_model="kimi-k2.6",
         models=(
+            "kimi-k2.6",
+            "kimi-k2.5",
             "moonshot-v1-8k",
             "moonshot-v1-32k",
             "moonshot-v1-128k",
-            "kimi-k2-0711-preview",
-            "kimi-latest",
         ),
         supports_model_listing=True,
         keys_url="https://platform.moonshot.ai/console/api-keys",
-        note="Moonshot AI. For the China platform, set the base URL to "
-             "https://api.moonshot.cn/v1 in Advanced.",
+        note="Moonshot AI (Kimi). For the China platform, set the base URL to "
+             "https://api.moonshot.cn/v1 in Advanced. Click 'Fetch models' for the live list "
+             "(the older kimi-k2 / kimi-latest ids were retired in 2026).",
     ),
     "custom": Provider(
         id="custom",
