@@ -126,7 +126,7 @@ are remembered per provider.
 | Provider | Key env var | Default base URL | Example model ids |
 |---|---|---|---|
 | **OpenRouter** | `OPENROUTER_API_KEY` | `https://openrouter.ai/api/v1` | `anthropic/claude-sonnet-4.6`, `openai/gpt-4o` |
-| **MiniMax** | `MINIMAX_API_KEY` | `https://api.minimax.io/v1` | `MiniMax-Text-01`, `MiniMax-M2.1`, `MiniMax-M1` |
+| **MiniMax** | `MINIMAX_API_KEY` | `https://api.minimax.io/v1` | `MiniMax-M3`, `MiniMax-M2.1`, `MiniMax-Text-01` |
 | **Kimi (Moonshot)** | `MOONSHOT_API_KEY` | `https://api.moonshot.ai/v1` | `kimi-k2.6`, `kimi-k2.5`, `moonshot-v1-8k` |
 | **Custom** | `LLM_API_KEY` | *(you set it)* | any |
 
