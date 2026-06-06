@@ -1,20 +1,26 @@
-FROM python:3.11-slim
+# ---- Stage 1: build the React frontend ----
+FROM node:20-slim AS web
+WORKDIR /web
+COPY web/package.json web/package-lock.json* ./
+RUN npm ci
+COPY web/ ./
+RUN npm run build
 
+# ---- Stage 2: Python API serving the built SPA ----
+FROM python:3.11-slim
 WORKDIR /app
 
-# Install dependencies first for better layer caching
+# Install Python dependencies first for better layer caching.
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application
+# Copy the application and the built frontend (served via StaticFiles).
 COPY . .
+COPY --from=web /web/dist ./web/dist
 
-# Streamlit defaults
-EXPOSE 8501
-ENV STREAMLIT_SERVER_HEADLESS=true \
-    STREAMLIT_SERVER_ADDRESS=0.0.0.0 \
-    STREAMLIT_SERVER_PORT=8501
+EXPOSE 8000
+ENV SKILLS_DIR=/app/skills
 
 # Provide OPENROUTER_API_KEY at runtime, e.g.:
-#   docker run -p 8501:8501 -e OPENROUTER_API_KEY=sk-... skill-factory
-CMD ["streamlit", "run", "app.py"]
+#   docker run -p 8000:8000 -e OPENROUTER_API_KEY=sk-or-... skill-factory
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

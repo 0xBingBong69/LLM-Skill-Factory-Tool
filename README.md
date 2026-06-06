@@ -11,50 +11,87 @@ Build a skill for a **backend engineer**, a **quant researcher**, a **robotics d
 > The leverage comes from a strong built-in **meta-skill** plus a **multi-stage,
 > human-in-the-loop** pipeline — structured generation beats one-shot prompting.
 
+The UI is a modern **React** single-page app talking to a **FastAPI** service that wraps the
+Python core. (A legacy Streamlit UI is still available — see [below](#legacy-streamlit-ui).)
+
 ---
 
 ## Features
 
 - **Multi-stage generation pipeline** with approval gates: *outline → (optional) context →
-  draft → refine → validate → save*.
+  draft → refine → validate → save* — with **streaming** generation (tokens appear live).
 - **Skill types**: domain-expert, specialist, workflow, hybrid.
 - **Hierarchical skills**: a base skill plus specialist **overlays** that extend it.
-- **Batch generator**: produce one overlay per entity from a base skill (entities from a JSON
-  preset or pasted list).
+- **Batch generator**: produce one overlay per entity from a base skill, with **live per-item
+  progress** (entities from a JSON preset or pasted list).
 - **Versioned, filesystem-first library**: every skill is plain `SKILL.md` + `metadata.json`,
   git-friendly and inspectable.
-- **Editor** with live markdown preview, a best-practice **validator**, and targeted LLM
-  "refine this section".
-- **Testing playground**: run a skill as a system prompt against any OpenRouter model and record
-  thumbs/notes.
+- **Editor** with a CodeMirror editor, live markdown preview, a best-practice **validator**,
+  **side-by-side version diffs**, debounced **autosave**, and targeted LLM "refine".
+- **Testing playground**: run a skill as a system prompt against any OpenRouter model
+  (streaming) and record thumbs/notes.
 - **Reference material ingestion**: paste text or upload files (`.txt`/`.md`; `.pdf` when `pypdf`
   is available).
-- **Export**: download a skill as a zip (with a usage guide) or copy it into another app.
+- **Export**: download a skill as a zip (with a usage guide).
+- **Polished UX**: light/dark themes, accessible Radix-based components, a ⌘K command palette,
+  guided first-run onboarding, and responsive layouts.
+
+---
+
+## Architecture
+
+```
+web/ (React + Vite + Tailwind SPA)
+   │  fetch + X-OpenRouter-Key header; SSE for streamed generation
+   ▼
+api/ (FastAPI) ── wraps, unchanged ──▶ skill_factory/ (pure Python core)
+   └─ in production also serves web/dist as static files (single container)
+```
+
+- `skill_factory/` — all logic (pipeline, validator, store, OpenRouter client). No UI imports.
+- `api/` — thin FastAPI layer exposing the core over REST + SSE. OpenAPI docs at `/docs`.
+- `web/` — the React frontend. In dev it runs on Vite and proxies `/api` to the API.
 
 ---
 
 ## Quickstart
 
-```bash
-# 1. Install
-pip install -r requirements.txt
+### Docker (recommended)
 
-# 2. Configure your key (either of these)
-cp .env.example .env        # then edit OPENROUTER_API_KEY=...
-# ...or just paste the key into the Config page at runtime (kept in-session only)
-
-# 3. Run
-streamlit run app.py
-```
-
-Then open the app, go to **Config**, paste your OpenRouter key (if not using `.env`), click
-**Fetch available models**, and head to **New Skill**.
-
-### Docker
+Builds the frontend and serves everything from one container on port 8000:
 
 ```bash
 docker build -t skill-factory .
-docker run -p 8501:8501 -e OPENROUTER_API_KEY=sk-or-... skill-factory
+docker run -p 8000:8000 -e OPENROUTER_API_KEY=sk-or-... skill-factory
+# open http://localhost:8000
+```
+
+You can also paste your key into the in-app **Config** page (kept in the browser tab only,
+never written to disk).
+
+### Local development (two processes)
+
+```bash
+# 1. Backend (FastAPI on :8000)
+pip install -r requirements.txt
+uvicorn api.main:app --reload --port 8000
+
+# 2. Frontend (Vite on :5173, proxies /api -> :8000)
+cd web
+npm install
+npm run dev
+# open http://localhost:5173
+```
+
+Optionally `cp .env.example .env` and set `OPENROUTER_API_KEY` to have the server pick it up
+automatically. Then open the app, finish onboarding (paste/test your key), and head to
+**New Skill**.
+
+### Production build (no Docker)
+
+```bash
+cd web && npm ci && npm run build      # outputs web/dist
+cd .. && uvicorn api.main:app --port 8000   # serves the SPA + API on :8000
 ```
 
 ---
@@ -123,20 +160,39 @@ entities; the batch generator turns each into a specialist overlay of a base ski
 | `SKILLS_DIR` | Where skills are written | `./skills` |
 
 The API key is resolved as: **in-app input → environment → `.env`**, and is never written to disk
-by the app.
+by the app. In the web UI the key is held in the browser tab (`sessionStorage`) and sent to the
+API per request via the `X-OpenRouter-Key` header — the server never persists or logs it.
 
 ---
 
 ## Development
 
 ```bash
+# Python: core round-trips, validator rules, pipeline (mocked), and FastAPI route tests
 pip install -r requirements.txt
-pytest                 # core round-trips, validator rules, pipeline (mocked), and an app smoke test
+pytest
+
+# Frontend: unit tests + production build (type-check)
+cd web
+npm install
+npm run test
+npm run build
 ```
 
-The core package [`skill_factory/`](skill_factory/) contains all logic and has **no Streamlit
-imports**, so it is fully unit-testable and reusable outside the UI. The Streamlit layer lives in
-[`ui/`](ui/) and [`app.py`](app.py).
+The core package [`skill_factory/`](skill_factory/) contains all logic and has **no UI imports**,
+so it is fully unit-testable and reusable. The API layer is [`api/`](api/) and the frontend is
+[`web/`](web/). Regenerate the typed API client with `npm run gen:types` (against a running
+server's `/openapi.json`).
+
+### Legacy Streamlit UI
+
+The original Streamlit app is still available and shares the same core:
+
+```bash
+streamlit run app.py     # http://localhost:8501
+```
+
+It will be removed once the web app has been validated against your workflows.
 
 ## Roadmap (deferred)
 

@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Design tokens. One source of truth for light + dark. The brand purple
+ * (#7C5CFC ≈ hsl(252 95% 67%)) seeds --primary/--ring; --success/--warning/--info
+ * map to the validator's error/warning/suggestion severities.
+ */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 252 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 252 60% 96%;
+    --accent-foreground: 252 83% 40%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 71% 38%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 42%;
+    --warning-foreground: 0 0% 100%;
+    --info: 214 90% 48%;
+    --info-foreground: 0 0% 100%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 252 83% 58%;
+    --radius: 0.6rem;
+  }
+
+  .dark {
+    --background: 240 10% 6%;
+    --foreground: 0 0% 98%;
+    --card: 240 8% 9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 8% 9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 252 95% 70%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 5% 16%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 240 5% 16%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 65% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 240 10% 6%;
+    --info: 214 90% 62%;
+    --info-foreground: 240 10% 6%;
+    --border: 240 5% 18%;
+    --input: 240 5% 18%;
+    --ring: 252 95% 70%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Minimal markdown styling for the preview surface (avoids a typography plugin). */
+@layer components {
+  .prose-skill {
+    @apply text-sm leading-relaxed text-foreground;
+  }
+  .prose-skill h1 { @apply mt-6 mb-3 text-xl font-semibold; }
+  .prose-skill h2 { @apply mt-5 mb-2 text-lg font-semibold; }
+  .prose-skill h3 { @apply mt-4 mb-2 text-base font-semibold; }
+  .prose-skill p { @apply my-3; }
+  .prose-skill ul { @apply my-3 list-disc pl-6; }
+  .prose-skill ol { @apply my-3 list-decimal pl-6; }
+  .prose-skill li { @apply my-1; }
+  .prose-skill a { @apply text-primary underline underline-offset-2; }
+  .prose-skill blockquote { @apply my-3 border-l-2 border-border pl-4 italic text-muted-foreground; }
+  .prose-skill code { @apply rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]; }
+  .prose-skill pre { @apply my-3 overflow-x-auto rounded-lg bg-muted p-4; }
+  .prose-skill pre code { @apply bg-transparent p-0; }
+  .prose-skill table { @apply my-3 w-full border-collapse text-left; }
+  .prose-skill th, .prose-skill td { @apply border border-border px-3 py-1.5; }
+  .prose-skill hr { @apply my-6 border-border; }
+}
+
+/* CodeMirror should fill its container. */
+.cm-editor { height: 100%; }
+.cm-editor .cm-scroller { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
