@@ -1,0 +1,11 @@
+# LLM Skill Factory — runtime dependencies
+streamlit>=1.36
+openai>=1.40          # used only as an OpenAI-compatible client pointed at OpenRouter
+python-dotenv>=1.0
+PyYAML>=6.0
+
+# Optional: enables PDF reference-material extraction. The app degrades gracefully if absent.
+pypdf>=4.0
+
+# Dev / testing
+pytest>=8.0
