@@ -12,6 +12,9 @@ endpoint (bring your own API key).
 > The leverage comes from a strong built-in **meta-skill** plus a **multi-stage,
 > human-in-the-loop** pipeline — structured generation beats one-shot prompting.
 
+> 🆕 **New to Python or the command line?** Follow the step-by-step
+> **[Installation Guide → INSTALL.md](INSTALL.md)**, which walks you through everything from zero.
+
 ---
 
 ## Features
@@ -36,6 +39,8 @@ endpoint (bring your own API key).
 ---
 
 ## Quickstart
+
+*First time with Python/terminals? Use the gentler **[step-by-step guide](INSTALL.md)** instead.*
 
 ```bash
 # 1. Install
