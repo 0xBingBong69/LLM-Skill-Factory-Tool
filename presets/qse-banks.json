@@ -1,0 +1,14 @@
+{
+  "name": "QSE Banks",
+  "description": "Banks listed on the Qatar Stock Exchange. Ships only as an EXAMPLE preset — presets are generic data; add your own (e.g. s-and-p-500.json, microservices.json).",
+  "entities": [
+    {"name": "Qatar National Bank", "ticker": "QNBK", "notes": "Largest bank in the Middle East/Africa by assets; conventional."},
+    {"name": "Qatar Islamic Bank", "ticker": "QIBK", "notes": "Largest Islamic bank in Qatar."},
+    {"name": "Commercial Bank of Qatar", "ticker": "CBQK", "notes": "Conventional; regional subsidiaries."},
+    {"name": "Doha Bank", "ticker": "DHBK", "notes": "Conventional."},
+    {"name": "Ahli Bank", "ticker": "ABQK", "notes": "Conventional."},
+    {"name": "Masraf Al Rayan", "ticker": "MARK", "notes": "Islamic; merged with Al Khaliji."},
+    {"name": "Dukhan Bank", "ticker": "DUBK", "notes": "Islamic."},
+    {"name": "Qatar International Islamic Bank", "ticker": "QIIK", "notes": "Islamic."}
+  ]
+}
